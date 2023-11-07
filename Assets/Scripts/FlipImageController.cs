@@ -18,6 +18,13 @@ namespace Tuong
         [SerializeField] protected Text txtNewGame;
         [SerializeField] protected Button btnNewGame;
         [SerializeField] protected Button btnNewGameTop;
+        [SerializeField] protected AudioSource audioSource;
+        public AudioClip clipOver;
+        public AudioClip clipWrong;
+        public AudioClip clipCorrect;
+        public AudioClip clipWin;
+        public float volume=0.5f;
+
         public List<int> Board { get; set; }
         
         public List<Transform> Items { get; set; }
@@ -86,7 +93,7 @@ namespace Tuong
             newGamePanel.gameObject.SetActive(true);
             if (isWin)
             {
-                txtNewGame.text = "You win!";
+                txtNewGame.text = string.Format("You win! Your score is: {0}", score);
             }
             else
             {
@@ -116,7 +123,7 @@ namespace Tuong
             }
         }
 
-        private void Update()
+        private void CheckGame()
         {
             txtScore.text = string.Format("Score: {0}", score);
             txtTurnCount.text = string.Format("Remaining Turns: {0}", turns);
@@ -124,10 +131,13 @@ namespace Tuong
             
             if (correctPairs == 10 && turns >= 0)
             {
+                audioSource.PlayOneShot(clipWin, volume);
                 ShowPanelNewGame();
             }
             if (turns == 0 && correctPairs < 10)
             {
+                audioSource.PlayOneShot(clipOver, volume);
+                Debug.Log("Game over");
                 ShowPanelNewGame(false);
             }
         }
@@ -138,7 +148,6 @@ namespace Tuong
             {
                 return;
             }
-            Debug.Log("Button clicked");
             var entryTransform = Items[i];
             var imageObj = entryTransform.Find("Image").GetComponent<Image>();
             imageObj.sprite = Resources.Load<Sprite>(String.Format("Sprites/{0}", Board[i]));
@@ -153,19 +162,20 @@ namespace Tuong
                 secondSelected = i;
                 if (Board[firstSelected] == Board[secondSelected])
                 {
-                    Debug.Log("Matched");
+                    audioSource.PlayOneShot(clipCorrect, volume);
                     firstSelected = -1;
                     secondSelected = -1;
                     UpdateCorrectStatistic();
                 }
                 else
                 {
-                    Debug.Log("Not matched");
+                    audioSource.PlayOneShot(clipWrong, volume);
                     UpdateWrongStatistic();
                     canSelect = false;
                     Invoke("FlipSelectedImages", 0.3f);
                 }
             }
+            CheckGame();
         }
 
         public void UpdateWrongStatistic()
