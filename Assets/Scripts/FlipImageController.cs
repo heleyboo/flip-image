@@ -123,12 +123,15 @@ namespace Tuong
             }
         }
 
-        private void CheckGame()
+        private void Update()
         {
             txtScore.text = string.Format("Score: {0}", score);
             txtTurnCount.text = string.Format("Remaining Turns: {0}", turns);
             txtCorrectPairCount.text = string.Format("Correct pairs: {0}", correctPairs);
-            
+        }
+
+        private void CheckGame()
+        {
             if (correctPairs == 10 && turns >= 0)
             {
                 audioSource.PlayOneShot(clipWin, volume);
@@ -144,7 +147,7 @@ namespace Tuong
 
         public void HandleClick(int i)
         {
-            if (!canSelect)
+            if (!canSelect || (firstSelected != -1 && i == firstSelected))
             {
                 return;
             }
@@ -157,6 +160,7 @@ namespace Tuong
             {
                 firstSelected = i;
             }
+            
             else
             {
                 secondSelected = i;
