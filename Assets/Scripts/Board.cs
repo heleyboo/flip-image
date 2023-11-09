@@ -12,7 +12,7 @@ public class Board : MonoBehaviour
     public static Board instance;     // 1
 
     public GameObject tilePrefab;
-    public BackgroundTile[,] allTiles;
+    public GameObject[,] allTiles;
     
     public List<Sprite> characters = new List<Sprite>();
     
@@ -22,7 +22,7 @@ public class Board : MonoBehaviour
     void Start()
     {
         instance = GetComponent<Board>();     // 7
-        allTiles = new BackgroundTile[width, height];
+        allTiles = new GameObject[width, height];
         Setup();
     }
 
@@ -39,6 +39,7 @@ public class Board : MonoBehaviour
                 GameObject backgroundTile = Instantiate(tilePrefab, tempPosition, Quaternion.identity);
                 backgroundTile.transform.parent = this.transform;
                 backgroundTile.name = string.Format("({0}, {1})", i, j);
+                allTiles[i, j] = backgroundTile;
                 
                 List<Sprite> possibleCharacters = new List<Sprite>(); // 1
                 possibleCharacters.AddRange(characters); // 2
