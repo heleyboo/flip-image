@@ -1,13 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Vector2 = System.Numerics.Vector2;
 
 public class Board : MonoBehaviour
 {
-    public int width;
+    [FormerlySerializedAs("width")] public int xSize;
 
-    public int height;
+    [FormerlySerializedAs("height")] public int ySize;
     
     public static Board instance;     // 1
 
@@ -22,18 +23,18 @@ public class Board : MonoBehaviour
     void Start()
     {
         instance = GetComponent<Board>();     // 7
-        allTiles = new GameObject[width, height];
+        allTiles = new GameObject[xSize, ySize];
         Setup();
     }
 
     private void Setup()
     {
-        Sprite[] previousLeft = new Sprite[height];
+        Sprite[] previousLeft = new Sprite[ySize];
         Sprite previousBelow = null;
         
-        for (int i = 0; i < width; i++)
+        for (int i = 0; i < xSize; i++)
         {
-            for (int j = 0; j < height; j++)
+            for (int j = 0; j < ySize; j++)
             {
                 Vector3 tempPosition = new Vector3(i, j, 0);
                 GameObject backgroundTile = Instantiate(tilePrefab, tempPosition, Quaternion.identity);
@@ -56,20 +57,20 @@ public class Board : MonoBehaviour
     }
     
     public IEnumerator FindNullTiles() {
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++)
+        for (int x = 0; x < xSize; x++) {
+            for (int y = 0; y < ySize; y++)
             {
                 SpriteRenderer render = allTiles[x, y].GetComponent<SpriteRenderer>();
                 if (render.sprite == null) {
-                    Debug.Log("Found null");
+                    Debug.Log(string.Format("Found null at ({0}, {1})", x, y));
                     yield return StartCoroutine(ShiftTilesDown(x, y));
                     break;
                 }
             }
         }
         
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
+        for (int x = 0; x < xSize; x++) {
+            for (int y = 0; y < ySize; y++) {
                 allTiles[x, y].GetComponent<BackgroundTile>().ClearAllMatches();
             }
         }
@@ -80,7 +81,7 @@ public class Board : MonoBehaviour
         List<SpriteRenderer>  renders = new List<SpriteRenderer>();
         int nullCount = 0;
 
-        for (int y = yStart; y < width; y++) {  // 1
+        for (int y = yStart; y < ySize; y++) {  // 1
             SpriteRenderer render = allTiles[x, y].GetComponent<SpriteRenderer>();
             if (render.sprite == null) { // 2
                 nullCount++;
@@ -91,8 +92,9 @@ public class Board : MonoBehaviour
         for (int i = 0; i < nullCount; i++) { // 3
             yield return new WaitForSeconds(shiftDelay);// 4
             for (int k = 0; k < renders.Count - 1; k++) { // 5
+                Debug.Log(string.Format("(x: {0}, y: {1})", x, yStart));
                 renders[k].sprite = renders[k + 1].sprite;
-                renders[k + 1].sprite = GetNewSprite(x, height - 1);
+                renders[k + 1].sprite = GetNewSprite(x, ySize - 1);
             }
         }
         IsShifting = false;
@@ -105,7 +107,7 @@ public class Board : MonoBehaviour
         if (x > 0) {
             possibleCharacters.Remove(allTiles[x - 1, y].GetComponent<SpriteRenderer>().sprite);
         }
-        if (x < width - 1) {
+        if (x < xSize - 1) {
             possibleCharacters.Remove(allTiles[x + 1, y].GetComponent<SpriteRenderer>().sprite);
         }
         if (y > 0) {
